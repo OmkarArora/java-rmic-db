@@ -24,6 +24,7 @@ public class StudImpl extends UnicastRemoteObject implements StudInterface {
 	public String insert(int empno, String ename, String job, int mgr, String hiredate, int sal, int comm, int deptno)
 			throws RemoteException {
 		// empno, ename, job, mgr, hiredate, sal, comm, deptno
+		System.out.println("insert() called");
 		try {
 			stmt.executeUpdate("insert into new_emp values(" + empno + ",'" + ename + "','" + job + "'," + mgr
 					+ ", TO_DATE('" + hiredate + "', 'DD-MM-YYYY')," + sal + "," + comm + "," + deptno + ")");
@@ -35,9 +36,12 @@ public class StudImpl extends UnicastRemoteObject implements StudInterface {
 	}
 
 	public String update(int empid, String newJob) throws RemoteException {
+		System.out.println("update() called");
 		try {
-			stmt.executeUpdate("update new_emp set job='" + newJob + "' where empno=" + empid);
-			return "Tuple Updated";
+			int rowsAffected = stmt.executeUpdate("update new_emp set job='" + newJob + "' where empno=" + empid);
+			if (rowsAffected == 0)
+				return "No such record exists";
+			return rowsAffected + " rows updated";
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -45,9 +49,12 @@ public class StudImpl extends UnicastRemoteObject implements StudInterface {
 	}
 
 	public String delete(int empid) throws RemoteException {
+		System.out.println("delete() called");
 		try {
-			stmt.executeUpdate("delete from new_emp where empno=" + empid);
-			return "Tuple Deleted";
+			int rowsAffected = stmt.executeUpdate("delete from new_emp where empno=" + empid);
+			if (rowsAffected == 0)
+				return "No such record exists";
+			return rowsAffected + " rows deleted";
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -55,6 +62,7 @@ public class StudImpl extends UnicastRemoteObject implements StudInterface {
 	}
 
 	public ArrayList<String> select() throws RemoteException {
+		System.out.println("select() called");
 		ArrayList<String> res = new ArrayList<>();
 		try {
 			rs = stmt.executeQuery("select * from new_emp");
@@ -88,6 +96,7 @@ public class StudImpl extends UnicastRemoteObject implements StudInterface {
 	}
 
 	public ArrayList<String> selectWithWhere(String job) throws RemoteException {
+		System.out.println("selectWithWhere() called");
 		ArrayList<String> res = new ArrayList<>();
 		try {
 			rs = stmt.executeQuery("select * from new_emp where LOWER(job)='" + job.toLowerCase() + "'");
@@ -117,17 +126,5 @@ public class StudImpl extends UnicastRemoteObject implements StudInterface {
 			e.printStackTrace();
 		}
 		return res;
-	}
-
-	public int getRowCount() {
-		int count = 0;
-		try {
-			ResultSet rs1 = stmt.executeQuery("select * from new_emp");
-			while (rs1.next())
-				count++;
-		} catch (SQLException e) {
-			System.out.println(e);
-		}
-		return count;
 	}
 }
